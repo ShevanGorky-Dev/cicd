@@ -1,0 +1,33 @@
+name: Deploy CICD-DEV
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy_environment:
+        type: choice
+        description: "Choose a deployment subscription"
+        required: true
+        options:
+          - cicd-dev
+
+permissions:
+  id-token: write
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  deploy-azure-dev:
+    runs-on: ubuntu-latest
+    environment: cicd-dev
+    steps:
+      - name: deploy-azure-dev
+        run: |
+          az deployment sub create \
+            --name azure-dev-deploy-${{ inputs.deploy_environment }} \
+            --location 'westeurope' \
+            --subscription ${{ inputs.deploy_environment }} \
+            --parameters @dev-parameters.jsonc \
+            --template-file dev-main.bicep
